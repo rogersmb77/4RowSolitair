@@ -1,26 +1,26 @@
 /*
-    This file is a part of Four Row Solitaire
+	This file is a part of Four Row Solitaire
 
-    Copyright (C) 2010 by Matt Stephen
+	Copyright (C) 2010-2014 by Matt Stephen
 
-    Four Row Solitaire is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Four Row Solitaire is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Four Row Solitaire is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	Four Row Solitaire is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with FourRowSolitaire.  If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with FourRowSolitaire.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 //package FourRowSolitaire;
 
 import java.awt.*;
-import java.util.Vector;
+import java.util.ArrayList;
 import javax.swing.JLayeredPane;
 
 /**
@@ -32,282 +32,324 @@ import javax.swing.JLayeredPane;
  */
 public class CardStack extends JLayeredPane
 {
-    private Vector<Card> cards = new Vector<Card>();
+	private final ArrayList<Card> cards = new ArrayList<Card>();
 
-    public CardStack() {}
+	public CardStack() {}
 
-    //For starting the game
-    public void addCard(Card card)
-    {
-        cards.add(card);
-        card.setBounds(0, 0, 72, 96);
-        add(card, 0);
-    }
-
-    public void addStack(CardStack stack)
-    {
-        for(int i = stack.length(); i > 0; i--)
-        {
-            Card card = stack.pop();
-            addCard(card);
-        }
-    }
-
-    public Card push(Card card)
-    {
-        cards.add(card);
-        card.setBounds(0, 0, 72, 96);
-        add(card, 0);
-        return card;
-    }
-
-    public CardStack push(CardStack stack)
-    {
-        while(!stack.isEmpty())
-        {
-            Card card = stack.pop();
-            push(card);
-        }
-
-        return stack; //returns empty stack
-    }
-
-    public synchronized Card pop()
-    {
-	Card card = peek();
-
-        this.remove(card);
-	cards.remove(cards.size() - 1);
-
-	return card;
-    }
-
-    public CardStack pop(CardStack stack)
-    {
-        //Temporary reverse pop of entire stack transfer
-        CardStack temp = new CardStack();
-
-        while(!stack.isEmpty())
-        {
-            Card card = stack.pop();
-            temp.push(card);
-            this.remove(card);
-        }
-
-        return temp;
-    }
-
-    public synchronized Card peek()
-    {
-	if (cards.isEmpty())
-        {
-            return null;
-        }
-
-	return cards.lastElement();
-    }
-
-    public boolean isEmpty()
-    {
-	return cards.size() == 0;
-    }
-
-    public int length()
-    {
-        return cards.size();
-    }
-
-    public synchronized int search(Card card)
-    {
-	int i = cards.lastIndexOf(card);
-
-	if (i >= 0)
-        {
-	    return cards.size() - i;
+	//For starting the game
+	public void addCard(Card card)
+	{
+		cards.add(card);
+		card.setBounds(0, 0, 72, 96);
+		add(card, 0);
 	}
 
-	return -1;
-    }
+	public void addStack(CardStack stack)
+	{
+		for(int i = stack.length(); i > 0; i--)
+		{
+			Card card = stack.pop();
+			addCard(card);
+		}
+	}
 
-    public Card getCardAtLocation(int index)
-    {
-        if(index < cards.size())
-        {
-            return cards.get(index);
-        }
+	public Card push(Card card)
+	{
+		cards.add(card);
+		card.setBounds(0, 0, 72, 96);
+		add(card, 0);
+		return card;
+	}
 
-        return null;
-    }
+	public CardStack push(CardStack stack)
+	{
+		while(!stack.isEmpty())
+		{
+			Card card = stack.pop();
+			push(card);
+		}
 
-    public Card getCardAtLocation(Point p)
-    {
-        if(cards.isEmpty())
-        {
-            return null;
-        }
-        
-        if(isValidClick(p))
-        {
-            int y = (int)p.getY();
+		return stack; //returns empty stack
+	}
 
-            int index;
+	public synchronized Card pop()
+	{
+		Card card = peek();
 
-            if(y > 25 * (cards.size() - 1))
-            {
-                index = cards.size() - 1;
-            }
-            else
-            {
-                index = y / 25;
-            }
+		this.remove(card);
+		cards.remove(cards.size() - 1);
 
-            if(isValidCard(index))
-            {
-                return cards.get(index);
-            }
-        }
-        
-        return null;
-    }
+		return card;
+	}
 
-    //Verifies that the card is a part of a valid stack
-    private boolean isValidCard(int index)
-    {
-        if(index >= cards.size())
-        {
-            return false;
-        }
-        
-        for(int i = index; i < cards.size() - 1; i++)
-        {
-            //Cards are not opposite colors or decreasing in value correctly
-            if(cards.get(i).getColor() == cards.get(i + 1).getColor() ||
-                    cards.get(i).getNumber() != (cards.get(i + 1).getNumber() + 1))
-            {
-                return false;
-            }
-        }
+	public CardStack pop(CardStack stack)
+	{
+		//Temporary reverse pop of entire stack transfer
+		CardStack temp = new CardStack();
 
-        return true;
-    }
+		while(!stack.isEmpty())
+		{
+			Card card = stack.pop();
+			temp.push(card);
+			this.remove(card);
+		}
 
-    //Checks if clicked area is defined on a card in the stack
-    private boolean isValidClick(Point p)
-    {
-        int y = (int)p.getY();
+		return temp;
+	}
 
-        if(!isEmpty())
-        {
-            if(y > 25 * (cards.size() - 1) + cards.lastElement().getBounds().getHeight())
-            {
-                return false;
-            }
-        }
+	public synchronized Card peek()
+	{
+		if(cards.isEmpty())
+		{
+			return null;
+		}
 
-        return true;
-    }
+		return cards.get(cards.size()-1);
+	}
 
-    public CardStack getStack(Card card)
-    {
-        CardStack temp = new CardStack();
-        int index = search(card);
-        
-        for(int i = 0; i < index; i++)
-        {
-            temp.push(getCardAtLocation(cards.size() - i - 1).clone());
-            getCardAtLocation(cards.size() - i - 1).highlight();
-        }
+	public boolean isEmpty()
+	{
+		return cards.isEmpty();
+	}
 
-        return temp;
-    }
+	public int length()
+	{
+		return cards.size();
+	}
 
-    public CardStack getStack(int numCards)
-    {
-        CardStack temp = new CardStack();
-        int index = length() - numCards;
+	public synchronized int search(Card card)
+	{
+		int i = cards.lastIndexOf(card);
 
-        for(int i = length(); i > index; i--)
-        {
-            temp.push(getCardAtLocation(cards.size() - i - 1).clone());
-            getCardAtLocation(cards.size() - i - 1).highlight();
-        }
+		if(i >= 0)
+		{
+			return cards.size() - i;
+		}
 
-        return temp;
-    }
+		return -1;
+	}
 
-    public boolean isValidMove(Card card)
-    {
-        return false;
-    }
+	public Card getCardAtLocation(int index)
+	{
+		if(index < cards.size())
+		{
+			return cards.get(index);
+		}
 
-    public boolean isValidMove(CardStack stack)
-    {
-        return false;
-    }
+		return null;
+	}
 
-    public Card getBottom()
-    {
-        return cards.firstElement();
-    }
+	public Card getCardAtLocation(Point p)
+	{
+		if(cards.isEmpty())
+		{
+			return null;
+		}
 
-    public CardStack getAvailableCards()
-    {
-        if(!isEmpty() && (this instanceof Column))
-        {
-            CardStack temp = new CardStack();
-            boolean cardsMatch = true;
-            int index = length() - 1;
+		if(isValidClick(p))
+		{
+			int y = (int)p.getY();
 
-            temp.addCard(cards.get(index));
+			int index;
 
-            do
-            {
-                index--;
+			if(y > 25 * (cards.size() - 1))
+			{
+				index = cards.size() - 1;
+			}
+			else
+			{
+				index = y / 25;
+			}
 
-                if(index >= 0)
-                {
-                    Card card = cards.get(index);
+			if(isValidCard(index))
+			{
+				return cards.get(index);
+			}
+		}
 
-                    if(card.getColor() != temp.peek().getColor() && card.getNumber() == temp.peek().getNumber() + 1)
-                    {
-                        temp.addCard(card);
-                    }
-                    else
-                    {
-                        cardsMatch = false;
-                    }
-                }
-                else
-                {
-                    cardsMatch = false;
-                }
+		return null;
+	}
 
-            } while(cardsMatch);
+	public Object[] getCardAtLocationPreview(Point p)
+	{
+		if(cards.isEmpty())
+		{
+			return null;
+		}
 
-            return temp;
-        }
-        else if(!isEmpty()) //is the discardPile or single cell
-        {
-            CardStack temp = new CardStack();
-            temp.addCard(peek());
+		int y = (int)p.getY();
 
-            return temp;
-        }
+		int index;
 
-        return null; //for deck and ace piles
-    }
+		if(y > 25 * (cards.size() - 1))
+		{
+			index = cards.size() - 1;
+		}
+		else
+		{
+			index = y / 25;
+		}
 
-    public void paint(Graphics g)
-    {
-        super.paint(g);
-        
-        if(!isEmpty())
-        {
-            for(int i = 0; i < cards.size(); i++)
-            {
-                Image image = cards.get(i).getImage();
-                g.drawImage(image, 0, i * 25, null);
-            }
-        }
-    }
+		if(index < cards.size())
+		{
+			return new Object[]{cards.get(index),index};
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	//Verifies that the card is a part of a valid stack
+	private boolean isValidCard(int index)
+	{
+		if(index >= cards.size())
+		{
+			return false;
+		}
+
+		for(int i = index; i < cards.size() - 1; i++)
+		{
+			//Cards are not opposite colors or decreasing in value correctly
+			if(cards.get(i).getColor() == cards.get(i + 1).getColor() ||
+				cards.get(i).getNumber() != (cards.get(i + 1).getNumber() + 1))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	//Checks if clicked area is defined on a card in the stack
+	private boolean isValidClick(Point p)
+	{
+		int y = (int)p.getY();
+
+		if(!isEmpty())
+		{
+			if(y > 25 * (cards.size() - 1) + cards.get(cards.size()-1).getBounds().getHeight())
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public CardStack getStack(Card card)
+	{
+		CardStack temp = new CardStack();
+		int index = search(card);
+
+		for(int i = 0; i < index; i++)
+		{
+			temp.push(getCardAtLocation(cards.size() - i - 1).clone());
+			getCardAtLocation(cards.size() - i - 1).highlight();
+		}
+
+		return temp;
+	}
+
+	public CardStack getStack(int numCards)
+	{
+		CardStack temp = new CardStack();
+		int index = length() - numCards;
+
+		for(int i = length(); i > index; i--)
+		{
+			temp.push(getCardAtLocation(cards.size() - i - 1).clone());
+			getCardAtLocation(cards.size() - i - 1).highlight();
+		}
+
+		return temp;
+	}
+
+	public CardStack undoStack(int numCards)
+	{
+		CardStack temp = new CardStack();
+
+		for(int i = 0; i < numCards; i++)
+		{
+			temp.push(pop());
+		}
+
+		return temp;
+	}
+
+	public boolean isValidMove(Card card)
+	{
+		return false;
+	}
+
+	public boolean isValidMove(CardStack stack)
+	{
+		return false;
+	}
+
+	public Card getBottom()
+	{
+		return cards.get(0);
+	}
+
+	public CardStack getAvailableCards()
+	{
+		if(!isEmpty() && (this instanceof Column))
+		{
+			CardStack temp = new CardStack();
+			boolean cardsMatch = true;
+			int index = length() - 1;
+
+			temp.addCard(cards.get(index));
+
+			do
+			{
+				index--;
+
+				if(index >= 0)
+				{
+					Card card = cards.get(index);
+
+					if(card.getColor() != temp.peek().getColor() && card.getNumber() == temp.peek().getNumber() + 1)
+					{
+						temp.addCard(card);
+					}
+					else
+					{
+						cardsMatch = false;
+					}
+				}
+				else
+				{
+					cardsMatch = false;
+				}
+			} while(cardsMatch);
+
+			return temp;
+		}
+		else if(!isEmpty()) //is the discardPile or single cell
+		{
+			CardStack temp = new CardStack();
+			temp.addCard(peek());
+
+			return temp;
+		}
+
+		return null; //for deck and ace piles
+	}
+
+	@Override
+	public void paint(Graphics g)
+	{
+		super.paint(g);
+
+		if(!isEmpty())
+		{
+			for(int i = 0; i < cards.size(); i++)
+			{
+				Image image = cards.get(i).getImage();
+				g.drawImage(image, 0, i * 25, null);
+			}
+		}
+	}
 }
