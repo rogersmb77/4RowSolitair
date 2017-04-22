@@ -1,3 +1,4 @@
+package FourRowSolitaire;
 /*
 	This file is a part of Four Row Solitaire
 
