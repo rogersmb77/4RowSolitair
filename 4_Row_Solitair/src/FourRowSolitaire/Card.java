@@ -181,7 +181,7 @@ public final class Card extends JComponent
 		return faceUp;
 	}
 
-	private boolean isValidSuit(String suit)
+	public boolean isValidSuit(String suit)
 	{
 		return suit.equals(SPADES_SUIT) || suit.equals(DIAMONDS_SUIT) ||
 				suit.equals(HEARTS_SUIT) || suit.equals(CLUBS_SUIT);
